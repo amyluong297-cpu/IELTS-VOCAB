@@ -301,8 +301,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
   <div class="hdr-right">
     <div class="streak-pill">🔥 <span id="hdr-streak">0</span> ngày</div>
     <button id="dark-toggle" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:7px 13px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:700;transition:all .2s">🌙</button>
-    <select id="voice-select" onchange="setTTS(this.value)" style="background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:7px 13px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:700;transition:all .2s;max-width:200px">
-      <option value="">🎤 Loading voices...</option>
+    <select id="voice-sel" onchange="setVoiceByIndex(this.value)" style="background:linear-gradient(135deg,#2563EB,#1E40AF);border:none;border-radius:20px;padding:7px 13px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:700;transition:all .2s;max-width:160px">
+      <option value="">🎙️ Giọng đọc...</option>
     </select>
     <button id="export-btn" onclick="exportData()" style="background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:7px 13px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:700;transition:all .2s">📤 Export</button>
     <button id="import-btn" onclick="document.getElementById('import-file').click()" style="background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:7px 13px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:700;transition:all .2s">📥 Import</button>
@@ -2435,25 +2435,31 @@ function quickStudy(id){
 // ═══════════════════════════════════════════════════════
 // TTS
 // ═══════════════════════════════════════════════════════
-let ttsVoice=null;function tts(text){
-  if(!('speechSynthesis' in window))return;
+let selectedVoice=null;
+function loadVoices(){
+  const voices=window.speechSynthesis.getVoices();
+  const enVoices=voices.filter(v=>v.lang.startsWith('en'));
+  if(!enVoices.length)return;
+  const sel=document.getElementById('voice-sel');
+  const saved=localStorage.getItem('ielts_voice_name');
+  sel.innerHTML='<option value="">🎙️ Giọng đọc...</option>'+enVoices.map((v,i)=>`<option value="${i}">${v.name.replace('Microsoft ','').replace(' Desktop','').replace('Google ','')}</option>`).join('');
+  selectedVoice=enVoices.find(v=>v.name===saved)||enVoices.find(v=>v.lang==='en-GB'&&v.name.includes('Google'))||enVoices.find(v=>v.lang.startsWith('en-GB'))||enVoices.find(v=>v.name.includes('Google'))||enVoices.find(v=>!v.localService)||enVoices[0];
+  if(selectedVoice)sel.value=enVoices.indexOf(selectedVoice);
+}
+function setVoiceByIndex(idx){
+  const voices=window.speechSynthesis.getVoices().filter(v=>v.lang.startsWith('en'));
+  selectedVoice=voices[parseInt(idx)]||voices[0];
+  if(selectedVoice)localStorage.setItem('ielts_voice_name',selectedVoice.name);
+}
+function tts(text){
+  if(!text||!text.trim())return;
   window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);u.rate=0.8;
-  if(ttsVoice){u.voice=ttsVoice;u.lang=ttsVoice.lang;}
+  if(!selectedVoice)loadVoices();
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=0.82;u.pitch=1;
+  if(selectedVoice){u.voice=selectedVoice;u.lang=selectedVoice.lang;}else{const v=window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('en'));if(v){u.voice=v;u.lang=v.lang;}else u.lang='en-GB';}
+  if(window.speechSynthesis.paused)window.speechSynthesis.resume();
   window.speechSynthesis.speak(u);
-}function setTTS(voiceIndex){
-  const vs=window.speechSynthesis.getVoices();
-  ttsVoice=vs[voiceIndex]||null;
-  console.log('🎙️ Voice: '+(ttsVoice?ttsVoice.name:'default'));
-}function loadVoices(){
-  const vs=window.speechSynthesis.getVoices();const sel=document.getElementById('voice-select');
-  if(!sel)return;console.log('📢 Found '+vs.length+' voices');
-  sel.innerHTML='<option value="">🎤 System Default</option>';
-  vs.forEach((v,i)=>{
-    const opt=document.createElement('option');opt.value=i;opt.textContent=v.name+' ('+v.lang+')';opt.title=v.uri;
-    sel.appendChild(opt);
-  });
-  if(ttsVoice&&vs.includes(ttsVoice)){sel.value=vs.indexOf(ttsVoice);}
 }
 function deleteVocab(id){
   if(!confirm('Xóa từ này khỏi danh sách?'))return;
@@ -2740,12 +2746,9 @@ if('serviceWorker' in navigator){
   });
 }
 
-// Load TTS voices as soon as possible
-if('speechSynthesis' in window){
-  window.speechSynthesis.onvoiceschanged = loadVoices;
-  if(window.speechSynthesis.getVoices().length) loadVoices(); // Firefox already loaded
-  setTimeout(loadVoices, 1000); // Chrome delay
-}
+// Boot TTS voices
+window.speechSynthesis.onvoiceschanged=loadVoices;
+if(window.speechSynthesis.getVoices().length)loadVoices();
 
 // Add to home screen prompt (some browsers)
 let deferredPrompt;
