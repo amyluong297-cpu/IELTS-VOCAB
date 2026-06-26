@@ -225,6 +225,11 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
 .s-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25)}
 .s-dot.on{background:rgba(255,255,255,.9)}
 
+/* ── VOICE SELECT ─────────────────────────────────── */
+#voice-sel{accent-color:var(--primary)}
+#voice-sel option{background:#2563EB;color:#fff;padding:8px;margin:4px 0}
+#voice-sel option:checked{background:linear-gradient(135deg,#2563EB,#1E40AF);color:#fff}
+
 /* ── RESPONSIVE ─────────────────────────────────── */
 @media (max-width:900px){
   .stats-row{grid-template-columns:repeat(2,1fr)}
