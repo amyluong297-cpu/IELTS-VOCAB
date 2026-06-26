@@ -301,10 +301,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
   <div class="hdr-right">
     <div class="streak-pill">🔥 <span id="hdr-streak">0</span> ngày</div>
     <button id="dark-toggle" onclick="toggleDark()" style="background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:7px 13px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:700;transition:all .2s">🌙</button>
-    <select id="voice-select" onchange="setTTSLang(this.value)" style="background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:7px 13px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:700;transition:all .2s">
-      <option value="en-US">🎙️ US (Nữ)</option>
-      <option value="en-GB">🎙️ UK (Nữ)</option>
-      <option value="en-AU">🎙️ AU (Nữ)</option>
+    <select id="voice-select" onchange="setTTS(this.value)" style="background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:7px 13px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:700;transition:all .2s;max-width:200px">
+      <option value="">🎤 Loading voices...</option>
     </select>
     <button id="export-btn" onclick="exportData()" style="background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:7px 13px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:700;transition:all .2s">📤 Export</button>
     <button id="import-btn" onclick="document.getElementById('import-file').click()" style="background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:7px 13px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:700;transition:all .2s">📥 Import</button>
@@ -2436,21 +2434,25 @@ function quickStudy(id){
 // ═══════════════════════════════════════════════════════
 // TTS
 // ═══════════════════════════════════════════════════════
-let ttsLang='en-US',ttsPitch=1.2;function tts(text){
+let ttsVoice=null;function tts(text){
   if(!('speechSynthesis' in window))return;
   window.speechSynthesis.cancel();
-  const speak=()=>{
-    const u=new SpeechSynthesisUtterance(text);
-    u.lang=ttsLang;u.rate=0.8;u.pitch=ttsPitch;
-    const vs=window.speechSynthesis.getVoices();
-    let v=vs.filter(x=>x.lang.startsWith(ttsLang.split('-')[0]));
-    v=v.filter(x=>x.name.toLowerCase().includes('female')||x.name.toLowerCase().includes('woman')||x.name.toLowerCase().includes('female'))[0]||v[0];
-    if(v) u.voice=v;
-    window.speechSynthesis.speak(u);
-  };
-  if(window.speechSynthesis.getVoices().length>0){speak();}
-  else{window.speechSynthesis.addEventListener('voiceschanged',speak,{once:true});}
-}function setTTSLang(lang){ttsLang=lang;console.log('🎙️ Voice: '+lang);}
+  const u=new SpeechSynthesisUtterance(text);u.rate=0.8;
+  if(ttsVoice){u.voice=ttsVoice;u.lang=ttsVoice.lang;}
+  window.speechSynthesis.speak(u);
+}function setTTS(voiceIndex){
+  const vs=window.speechSynthesis.getVoices();
+  ttsVoice=vs[voiceIndex]||null;
+  console.log('🎙️ Voice: '+(ttsVoice?ttsVoice.name:'default'));
+}function loadVoices(){
+  const vs=window.speechSynthesis.getVoices();const sel=document.getElementById('voice-select');
+  sel.innerHTML='<option value="">🎤 System Default</option>';
+  vs.forEach((v,i)=>{
+    const opt=document.createElement('option');opt.value=i;opt.textContent=v.name+' ('+v.lang+')';opt.title=v.uri;
+    sel.appendChild(opt);
+  });
+  if(ttsVoice&&vs.includes(ttsVoice)){sel.value=vs.indexOf(ttsVoice);}
+}
 
 // ═══════════════════════════════════════════════════════
 // CELEBRATION
@@ -2728,6 +2730,10 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
       console.log('🔄 Service Worker controller changed - app updated!');
     });
+
+    // Load TTS voices
+    setTimeout(loadVoices, 500);
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
   });
 }
 
