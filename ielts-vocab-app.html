@@ -2742,9 +2742,9 @@ if('serviceWorker' in navigator){
 
 // Load TTS voices as soon as possible
 if('speechSynthesis' in window){
-  loadVoices();
-  window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
-  setTimeout(loadVoices, 1000);
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+  if(window.speechSynthesis.getVoices().length) loadVoices(); // Firefox already loaded
+  setTimeout(loadVoices, 1000); // Chrome delay
 }
 
 // Add to home screen prompt (some browsers)
