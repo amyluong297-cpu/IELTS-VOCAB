@@ -2377,6 +2377,7 @@ function renderBank(){
         <span class="lv-badge">${w.lv}</span>
         <span style="font-size:.65rem;color:var(--muted)">GĐ ${c.stage}</span>
         <button onclick="event.stopPropagation();openEdit(${w.id})" style="background:none;border:1px solid #C2410C;border-radius:8px;padding:3px 7px;font-size:.68rem;color:#C2410C;cursor:pointer;margin-top:2px;font-weight:700">✏️</button>
+        <button onclick="event.stopPropagation();deleteVocab(${w.id})" style="background:none;border:1px solid #EF4444;border-radius:8px;padding:3px 7px;font-size:.68rem;color:#EF4444;cursor:pointer;margin-top:2px;margin-left:4px;font-weight:700">🗑️</button>
       </div>
     </div>`;
   }).join('');
@@ -2446,12 +2447,18 @@ let ttsVoice=null;function tts(text){
   console.log('🎙️ Voice: '+(ttsVoice?ttsVoice.name:'default'));
 }function loadVoices(){
   const vs=window.speechSynthesis.getVoices();const sel=document.getElementById('voice-select');
+  if(!sel)return;console.log('📢 Found '+vs.length+' voices');
   sel.innerHTML='<option value="">🎤 System Default</option>';
   vs.forEach((v,i)=>{
     const opt=document.createElement('option');opt.value=i;opt.textContent=v.name+' ('+v.lang+')';opt.title=v.uri;
     sel.appendChild(opt);
   });
   if(ttsVoice&&vs.includes(ttsVoice)){sel.value=vs.indexOf(ttsVoice);}
+}
+function deleteVocab(id){
+  if(!confirm('Xóa từ này khỏi danh sách?'))return;
+  const idx=VOCAB.findIndex(w=>w.id===id);
+  if(idx>-1){VOCAB.splice(idx,1);const k=getScreenKey();localStorage.setItem(k,JSON.stringify(VOCAB));alert('✅ Đã xóa!');renderBank();}
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2730,11 +2737,14 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
       console.log('🔄 Service Worker controller changed - app updated!');
     });
-
-    // Load TTS voices
-    setTimeout(loadVoices, 500);
-    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
   });
+}
+
+// Load TTS voices as soon as possible
+if('speechSynthesis' in window){
+  loadVoices();
+  window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+  setTimeout(loadVoices, 1000);
 }
 
 // Add to home screen prompt (some browsers)
