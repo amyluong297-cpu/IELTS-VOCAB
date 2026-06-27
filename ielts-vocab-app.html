@@ -2164,10 +2164,16 @@ function doRead(){
   const distractors=([...sameTopicOthers,...fillerOthers]).slice(0,3);
   const opts=shuffle([w,...distractors]);
   const [c,t]=[SES.idx+1,SES.queue.length];
-  // Build gap sentence — replace the phrase in ex1 with a blank
+  // Build gap sentence — try ex1, fallback to ex2
+  const src=(w.ex1&&w.ex1.toLowerCase().includes(w.phrase.toLowerCase()))?w.ex1:
+            (w.ex2&&w.ex2.toLowerCase().includes(w.phrase.toLowerCase()))?w.ex2:w.ex1||w.def;
   const escapedPhrase=w.phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  const gapSentence=w.ex1.replace(new RegExp(escapedPhrase,'gi'),
+  let gapSentence=src.replace(new RegExp(escapedPhrase,'gi'),
     `<strong style="color:var(--primary);background:#EDE9FE;border-radius:6px;padding:2px 8px">______</strong>`);
+  // If still no gap found, warn
+  if(!gapSentence.includes('______')){
+    gapSentence='<span style="color:#F87171">[Lỗi: Không tìm thấy cụm từ trong câu]</span> '+src;
+  }
   document.getElementById('read-body').innerHTML=`
     ${ph(c,t)}
     <div class="card">
@@ -2214,6 +2220,7 @@ function doWrite(){
       <div style="font-size:.78rem;color:var(--muted);margin-bottom:12px;font-weight:600">✍️ Điền cụm từ còn thiếu vào chỗ trống</div>
       <div style="font-size:1.05rem;line-height:1.9;color:var(--text);margin-bottom:8px">${gapSentence}</div>
       <div style="font-size:.9rem;line-height:1.7;color:var(--muted);font-style:italic;border-left:3px solid var(--primary);padding-left:10px">🇻🇳 ${w.def_vi}</div>
+      <div style="font-size:.85rem;line-height:1.6;color:var(--muted);margin-top:6px;padding-left:10px">📚 Từ đồng nghĩa: <strong>${(w.syn||[]).slice(0,2).join(', ') || 'N/A'}</strong></div>
       <div style="margin-top:10px;font-size:.75rem;color:var(--muted)">${w.phrase.split(' ').length} từ · gợi ý: <strong>${w.phrase.split(' ').map(wd=>wd[0]).join(' ')}</strong></div>
     </div>
     <div style="margin-top:16px">
