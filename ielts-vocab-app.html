@@ -2111,7 +2111,6 @@ function doListen(){
       <p style="color:var(--muted);font-size:.92rem;margin-bottom:14px">🎧 Nghe câu và chọn từ/cụm từ xuất hiện trong câu</p>
       <button class="listen-ring" onclick="tts('${esc(w.ex1)}')">🔊</button>
       <p style="color:var(--muted);font-size:.8rem;margin-top:6px">Nhấn để nghe lại</p>
-      <p style="color:var(--muted);font-size:.75rem;margin-top:8px;font-style:italic">Từ cần tìm: <strong>${w.phrase}</strong></p>
     </div>
     <div class="quiz-grid" id="l-opts">
       ${opts.map(o=>`<button class="quiz-opt" data-id="${o.id}" onclick="chkListen(${o.id},${w.id},this)">
