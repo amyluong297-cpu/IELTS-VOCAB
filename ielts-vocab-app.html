@@ -2108,9 +2108,10 @@ function doListen(){
   document.getElementById('listen-body').innerHTML=`
     ${ph(c,t)}
     <div class="card" style="text-align:center;padding:32px 24px">
-      <p style="color:var(--muted);font-size:.92rem;margin-bottom:14px">🎧 Nghe và chọn cụm từ bạn vừa nghe được</p>
-      <button class="listen-ring" onclick="tts('${esc(w.phrase)}')">🔊</button>
+      <p style="color:var(--muted);font-size:.92rem;margin-bottom:14px">🎧 Nghe câu và chọn từ/cụm từ xuất hiện trong câu</p>
+      <button class="listen-ring" onclick="tts('${esc(w.ex1)}')">🔊</button>
       <p style="color:var(--muted);font-size:.8rem;margin-top:6px">Nhấn để nghe lại</p>
+      <p style="color:var(--muted);font-size:.75rem;margin-top:8px;font-style:italic">Từ cần tìm: <strong>${w.phrase}</strong></p>
     </div>
     <div class="quiz-grid" id="l-opts">
       ${opts.map(o=>`<button class="quiz-opt" data-id="${o.id}" onclick="chkListen(${o.id},${w.id},this)">
@@ -2118,7 +2119,7 @@ function doListen(){
         <div style="font-size:.78rem;color:var(--muted);margin-top:5px">🇻🇳 ${o.def_vi}</div>
       </button>`).join('')}
     </div>`;
-  setTimeout(()=>tts(w.phrase),800);
+  setTimeout(()=>tts(w.ex1),800);
 }
 
 function chkListen(sel,cor,btn){
