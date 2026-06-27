@@ -2212,9 +2212,9 @@ function doWrite(){
     ${ph(c,t)}
     <div class="card">
       <div style="font-size:.78rem;color:var(--muted);margin-bottom:12px;font-weight:600">✍️ Điền cụm từ còn thiếu vào chỗ trống</div>
-      <div style="font-size:1.05rem;line-height:1.9;color:var(--text)">${gapSentence}</div>
-      <div style="margin-top:14px;font-size:.85rem;color:var(--primary);font-weight:600">🇻🇳 ${w.def_vi}</div>
-      <div style="margin-top:4px;font-size:.75rem;color:var(--muted)">${w.phrase.split(' ').length} từ · gợi ý: <strong>${w.phrase.split(' ').map(wd=>wd[0]).join(' ')}</strong></div>
+      <div style="font-size:1.05rem;line-height:1.9;color:var(--text);margin-bottom:8px">${gapSentence}</div>
+      <div style="font-size:.9rem;line-height:1.7;color:var(--muted);font-style:italic;border-left:3px solid var(--primary);padding-left:10px">🇻🇳 ${w.def_vi}</div>
+      <div style="margin-top:10px;font-size:.75rem;color:var(--muted)">${w.phrase.split(' ').length} từ · gợi ý: <strong>${w.phrase.split(' ').map(wd=>wd[0]).join(' ')}</strong></div>
     </div>
     <input type="text" class="write-box" id="w-ans" placeholder="Nhập cụm từ còn thiếu..."
       autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
