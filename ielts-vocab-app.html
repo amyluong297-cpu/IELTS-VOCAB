@@ -2173,7 +2173,7 @@ function doRead(){
     <div class="card">
       <div style="font-size:.78rem;color:var(--muted);margin-bottom:10px">📖 Điền cụm từ thích hợp vào chỗ trống (____)</div>
       <div style="font-size:1.05rem;line-height:1.8;color:var(--text);margin-bottom:8px">"${gapSentence}"</div>
-      <div style="font-size:.9rem;line-height:1.7;color:var(--muted);font-style:italic;border-left:3px solid var(--primary);padding-left:10px;margin-top:10px">🇻🇳 ${w.def_vi}</div>
+      <div style="font-size:.9rem;line-height:1.7;color:var(--muted);font-style:italic;border-left:3px solid var(--primary);padding-left:10px;margin-top:10px">📚 Từ đồng nghĩa: <strong>${(w.syn||[]).slice(0,2).join(', ') || 'N/A'}</strong></div>
     </div>
     <div style="font-size:.88rem;color:var(--muted);margin-bottom:12px;font-weight:600">Chọn cụm từ phù hợp nhất:</div>
     <div class="quiz-grid" id="r-opts">
@@ -2216,10 +2216,13 @@ function doWrite(){
       <div style="font-size:.9rem;line-height:1.7;color:var(--muted);font-style:italic;border-left:3px solid var(--primary);padding-left:10px">🇻🇳 ${w.def_vi}</div>
       <div style="margin-top:10px;font-size:.75rem;color:var(--muted)">${w.phrase.split(' ').length} từ · gợi ý: <strong>${w.phrase.split(' ').map(wd=>wd[0]).join(' ')}</strong></div>
     </div>
-    <input type="text" class="write-box" id="w-ans" placeholder="Nhập cụm từ còn thiếu..."
-      autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
-      onkeydown="if(event.key==='Enter')chkWrite('${esc(w.phrase)}')">
-    <button class="btn-p" style="margin-top:12px" onclick="chkWrite('${esc(w.phrase)}')">Kiểm tra ✓</button>
+    <div style="margin-top:16px">
+      <div style="font-size:.85rem;color:var(--muted);margin-bottom:8px;font-weight:600">👇 Nhập cụm từ vào ô bên dưới:</div>
+      <input type="text" class="write-box" id="w-ans" placeholder="Nhập cụm từ còn thiếu..."
+        autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+        onkeydown="if(event.key==='Enter')chkWrite('${esc(w.phrase)}')">
+      <button class="btn-p" style="margin-top:12px" onclick="chkWrite('${esc(w.phrase)}')">Kiểm tra ✓</button>
+    </div>
     <div id="w-fb"></div>`;
   setTimeout(()=>document.getElementById('w-ans')?.focus(),300);
 }
