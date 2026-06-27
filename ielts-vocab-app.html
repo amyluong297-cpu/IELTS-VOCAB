@@ -2164,15 +2164,17 @@ function doRead(){
   const distractors=([...sameTopicOthers,...fillerOthers]).slice(0,3);
   const opts=shuffle([w,...distractors]);
   const [c,t]=[SES.idx+1,SES.queue.length];
-  // Build gap sentence — try ex1, fallback to ex2
-  const src=(w.ex1&&w.ex1.toLowerCase().includes(w.phrase.toLowerCase()))?w.ex1:
-            (w.ex2&&w.ex2.toLowerCase().includes(w.phrase.toLowerCase()))?w.ex2:w.ex1||w.def;
+  // Try ex1 first, fallback to ex2
+  let src=(w.ex1&&w.ex1.toLowerCase().includes(w.phrase.toLowerCase()))?w.ex1:
+          (w.ex2&&w.ex2.toLowerCase().includes(w.phrase.toLowerCase()))?w.ex2:null;
+  if(!src){src=w.ex1||w.ex2||'"'+w.phrase+' - '+w.def+'"';}
+  // Always try to create gap, if fails replace first word
   const escapedPhrase=w.phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   let gapSentence=src.replace(new RegExp(escapedPhrase,'gi'),
     `<strong style="color:var(--primary);background:#EDE9FE;border-radius:6px;padding:2px 8px">______</strong>`);
-  // If still no gap found, warn
+  // If phrase not found in sentence, replace first word with blank
   if(!gapSentence.includes('______')){
-    gapSentence='<span style="color:#F87171">[Lỗi: Không tìm thấy cụm từ trong câu]</span> '+src;
+    gapSentence=src.replace(/\b\w+\b/,(m)=>`<strong style="color:var(--primary);background:#EDE9FE;border-radius:6px;padding:2px 8px">______</strong>`);
   }
   document.getElementById('read-body').innerHTML=`
     ${ph(c,t)}
@@ -2208,12 +2210,17 @@ function doWrite(){
   const w=SES.queue[SES.idx];
   const [c,t]=[SES.idx+1,SES.queue.length];
   const escapedPhrase=w.phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  // Pick sentence that contains the phrase
-  const src=w.ex1&&w.ex1.toLowerCase().includes(w.phrase.toLowerCase())?w.ex1:
-            w.ex2&&w.ex2.toLowerCase().includes(w.phrase.toLowerCase())?w.ex2:w.ex1;
-  const gapSentence=src?src.replace(new RegExp(escapedPhrase,'gi'),
-    `<span style="background:#EDE9FE;color:var(--primary);font-weight:800;padding:2px 12px;border-radius:8px;font-size:1.1rem;letter-spacing:2px">______</span>`)
-    :'"'+w.def+'"';
+  // Pick sentence that contains the phrase, try both ex1 and ex2
+  let src=w.ex1&&w.ex1.toLowerCase().includes(w.phrase.toLowerCase())?w.ex1:
+          w.ex2&&w.ex2.toLowerCase().includes(w.phrase.toLowerCase())?w.ex2:null;
+  if(!src){src=w.ex1||w.ex2||'"'+w.phrase+' - '+w.def+'"';}
+  // Always create gap - if phrase not found, replace first word
+  let gapSentence=src.replace(new RegExp(escapedPhrase,'gi'),
+    `<span style="background:#EDE9FE;color:var(--primary);font-weight:800;padding:2px 12px;border-radius:8px;font-size:1.1rem;letter-spacing:2px">______</span>`);
+  // If phrase not found, replace first word with blank
+  if(!gapSentence.includes('______')){
+    gapSentence=src.replace(/\b\w+\b/,(m)=>`<span style="background:#EDE9FE;color:var(--primary);font-weight:800;padding:2px 12px;border-radius:8px;font-size:1.1rem;letter-spacing:2px">______</span>`);
+  }
   document.getElementById('write-body').innerHTML=`
     ${ph(c,t)}
     <div class="card">
