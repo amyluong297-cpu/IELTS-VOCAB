@@ -451,6 +451,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--
           <button class="r-btn r-h" onclick="rate(1)">🤔 Khó</button>
           <button class="r-btn r-g" onclick="rate(2)">😊 Được</button>
           <button class="r-btn r-e" onclick="rate(3)">🚀 Dễ!</button>
+          <button class="r-btn" onclick="deleteFlashcard()" style="background:#ff6b6b;border:none;cursor:pointer">🗑️ Xóa</button>
         </div>
       </div>
       <div id="fc-flip-btn" style="margin-top:16px">
@@ -2064,6 +2065,22 @@ function rate(q){
   ST.cards[w.id]={...card,stage:newStage,due:new Date(Date.now()+days*86400000).toISOString()};
   if(q>=2) SES.correct++;
   addProg(); SES.idx++; renderFC();
+}
+
+function deleteFlashcard(){
+  const w=SES.queue[SES.idx];
+  if(!confirm(`Xóa từ "${w.phrase}" khỏi danh sách?`)) return;
+  VOCAB=VOCAB.filter(v=>v.id!==w.id);
+  delete ST.cards[w.id];
+  if(ST.deleted) ST.deleted.push(w.id);
+  saveState();
+  SES.idx++;
+  if(SES.idx>=SES.queue.length){
+    alert('✅ Hoàn thành! '+SES.correct+' từ làm đúng.');
+    showScreen('home');
+  } else {
+    renderFC();
+  }
 }
 
 // ═══════════════════════════════════════════════════════
