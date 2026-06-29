@@ -2078,16 +2078,29 @@ function rate(q){
 }
 
 function deleteFlashcard(){
-  const w=SES.queue[SES.idx];
-  VOCAB=VOCAB.filter(v=>v.id!==w.id);
-  delete ST.cards[w.id];
-  localStorage.setItem('tm_ielts_v3',JSON.stringify(VOCAB));
-  saveState();
-  SES.idx++;
-  if(SES.idx>=SES.queue.length){
-    showScreen('home');
-  } else {
-    renderFC();
+  try{
+    const w=SES.queue[SES.idx];
+    if(!w){console.error('No word found'); return;}
+
+    console.log('Deleting word:', w.phrase, 'ID:', w.id);
+
+    VOCAB=VOCAB.filter(v=>v.id!==w.id);
+    delete ST.cards[w.id];
+    localStorage.setItem('tm_ielts_v3',JSON.stringify(VOCAB));
+    saveState();
+
+    console.log('Word deleted. Remaining:', VOCAB.length);
+
+    SES.idx++;
+    if(SES.idx>=SES.queue.length){
+      alert('✅ Hoàn thành! Đã xóa xong.');
+      showScreen('home');
+    } else {
+      renderFC();
+    }
+  }catch(e){
+    console.error('Error deleting flashcard:', e);
+    alert('❌ Lỗi: '+e.message);
   }
 }
 
