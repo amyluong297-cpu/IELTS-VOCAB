@@ -2087,7 +2087,7 @@ function deleteFlashcard(){
     VOCAB=VOCAB.filter(v=>v.id!==w.id);
     delete ST.cards[w.id];
     localStorage.setItem('tm_ielts_v3',JSON.stringify(VOCAB));
-    saveState();
+    localStorage.setItem('ielts_srs6',JSON.stringify(ST.cards));
 
     console.log('Word deleted. Remaining:', VOCAB.length);
 
