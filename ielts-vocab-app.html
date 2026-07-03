@@ -2554,7 +2554,7 @@ function tts(text){
 function deleteVocab(id){
   if(!confirm('Xóa từ này khỏi danh sách?'))return;
   const idx=VOCAB.findIndex(w=>w.id===id);
-  if(idx>-1){VOCAB.splice(idx,1);const k=getScreenKey();localStorage.setItem(k,JSON.stringify(VOCAB));alert('✅ Đã xóa!');renderBank();}
+  if(idx>-1){VOCAB.splice(idx,1);localStorage.setItem('tm_ielts_v3',JSON.stringify(VOCAB));localStorage.setItem('ielts_srs6',JSON.stringify(ST.cards));alert('✅ Đã xóa!');renderBank();}
 }
 
 // ═══════════════════════════════════════════════════════
