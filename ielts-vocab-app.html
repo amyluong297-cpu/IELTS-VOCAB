@@ -1766,6 +1766,20 @@ function nextDue(stage) {
 // STATE
 // ═══════════════════════════════════════════════════════
 const SK = 'tm_ielts_v3';
+const VK = 'tm_ielts_vocab';
+
+// Load VOCAB from localStorage if exists
+try {
+  const saved = localStorage.getItem(VK);
+  if(saved) {
+    VOCAB = JSON.parse(saved);
+  }
+} catch(e) {}
+
+// Save VOCAB to localStorage (for deletion persistence)
+function saveVocab() {
+  localStorage.setItem(VK, JSON.stringify(VOCAB));
+}
 function loadST() {
   try { const s=localStorage.getItem(SK); if(s) {
     const st=JSON.parse(s);
@@ -2554,7 +2568,15 @@ function tts(text){
 function deleteVocab(id){
   if(!confirm('Xóa từ này khỏi danh sách?'))return;
   const idx=VOCAB.findIndex(w=>w.id===id);
-  if(idx>-1){VOCAB.splice(idx,1);localStorage.setItem('tm_ielts_v3',JSON.stringify(VOCAB));localStorage.setItem('ielts_srs6',JSON.stringify(ST.cards));alert('✅ Đã xóa!');renderBank();}
+  if(idx>-1){
+    VOCAB.splice(idx,1);
+    saveVocab();
+    delete ST.cards[id];
+    localStorage.setItem(SK,JSON.stringify(ST));
+    alert('✅ Đã xóa!');
+    renderBank();
+    renderDash();
+  }
 }
 
 // ═══════════════════════════════════════════════════════
