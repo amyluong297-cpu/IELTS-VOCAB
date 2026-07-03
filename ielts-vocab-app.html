@@ -1841,7 +1841,7 @@ function getMastered(){return Object.values(ST.cards).filter(c=>c.stage>=5).leng
 function getSeen(){return Object.values(ST.cards).filter(c=>c.seen).length;}
 
 function addProg(){
-  ST.dailyDone=Math.min(20,ST.dailyDone+1);
+  ST.dailyDone=Math.min(40,ST.dailyDone+1);
   ST.lastDate=new Date().toDateString();
   ST.totalDone++; save();
   // Update visible stats without leaving the current screen
@@ -1849,9 +1849,9 @@ function addProg(){
   ['sb-seen','d-seen'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=se;});
   ['sb-due','d-due','dash-due'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=due;});
   ['sb-mastered','d-mastered'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=m;});
-  const pct=Math.min(100,ST.dailyDone/20*100);
+  const pct=Math.min(100,ST.dailyDone/40*100);
   const pf=document.getElementById('d-prog-fill');if(pf)pf.style.width=pct+'%';
-  const pt=document.getElementById('d-prog-txt');if(pt)pt.textContent=ST.dailyDone+'/20 cụm từ';
+  const pt=document.getElementById('d-prog-txt');if(pt)pt.textContent=ST.dailyDone+'/40 cụm từ';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1901,9 +1901,9 @@ function updateDash(){
   document.getElementById('sb-seen').textContent=se;
   document.getElementById('sb-due').textContent=due;
   document.getElementById('sb-mastered').textContent=m;
-  const pct=Math.min(100,ST.dailyDone/20*100);
+  const pct=Math.min(100,ST.dailyDone/40*100);
   document.getElementById('d-prog-fill').style.width=pct+'%';
-  document.getElementById('d-prog-txt').textContent=ST.dailyDone+'/20';
+  document.getElementById('d-prog-txt').textContent=ST.dailyDone+'/40';
   const q=QUOTES[new Date().getDate()%QUOTES.length];
   document.getElementById('hero-quote').textContent=q.text;
   document.getElementById('hero-author').textContent='— '+q.author;
