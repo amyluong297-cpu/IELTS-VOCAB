@@ -2331,10 +2331,10 @@ function chkWrite(correct){
   const w=VOCAB.find(v=>v.phrase===correct);
   tts(correct);
   const exHtml=w?`
-    <div style="background:#F5F3FF;border-radius:14px;padding:14px;margin-top:12px">
-      <div style="font-size:.7rem;color:var(--primary);font-weight:700;margin-bottom:6px">📝 Ví dụ đầy đủ</div>
-      <div style="font-size:.88rem;font-style:italic;line-height:1.65">"${w.ex1}"</div>
-      ${w.ex2?`<div style="font-size:.88rem;font-style:italic;line-height:1.65;margin-top:4px">"${w.ex2}"</div>`:''}
+    <div style="background:#2D3748;border-radius:14px;padding:14px;margin-top:12px;border:1px solid #4A5568">
+      <div style="font-size:.7rem;color:#60A5FA;font-weight:700;margin-bottom:6px">📝 Ví dụ đầy đủ</div>
+      <div style="font-size:.88rem;font-style:italic;line-height:1.65;color:#E2E8F0">"${w.ex1}"</div>
+      ${w.ex2?`<div style="font-size:.88rem;font-style:italic;line-height:1.65;margin-top:4px;color:#E2E8F0">"${w.ex2}"</div>`:''}
     </div>`:'';
   document.getElementById('w-fb').innerHTML=`
     <div class="${ok?'result-ok':'result-no'}" style="margin-top:14px">
