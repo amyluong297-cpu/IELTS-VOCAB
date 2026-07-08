@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Import Merged Study State</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 40px;
+        }
+        h1 { font-size: 2rem; margin-bottom: 20px; }
+        .status {
+            font-size: 18px;
+            margin: 20px;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .loading { color: #60a5fa; }
+        .success { color: #10b981; font-weight: bold; font-size: 1.2rem; }
+        .error { color: #f87171; }
+        .details {
+            text-align: left;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        .btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .btn:hover { background: #059669; }
+        .btn:disabled { background: #6b7280; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Khôi Phục Lịch Sử Học Tập</h1>
+        <div class="status loading">
+            <p id="status-text">⏳ Đang chuẩn bị khôi phục...</p>
+            <div class="details" id="details-box" style="display:none;"></div>
+        </div>
+        <button class="btn" id="import-btn" onclick="importStudyState()">✓ Khôi Phục Ngay</button>
+        <button class="btn" style="background: #6b7280;" onclick="window.location.href='ielts-vocab-app.html'">↩️ Quay Lại App</button>
+    </div>
+
+    <script>
+        let mergedStudyState = null;
+
+        window.addEventListener('load', async function() {
+            const details = document.getElementById('details-box');
+            const statusText = document.getElementById('status-text');
+
+            try {
+                // Load merged study state from file
+                const response = await fetch('./merged_study_state.json');
+                if (!response.ok) throw new Error('Cannot load merged_study_state.json');
+                mergedStudyState = await response.json();
+
+                // Check if data already in localStorage
+                const current = localStorage.getItem('tm_ielts_v3');
+                const currentData = current ? JSON.parse(current) : null;
+
+                const oldCards = currentData?.cards || {};
+                const newCards = mergedStudyState.cards || {};
+
+                details.innerHTML = `
+                    <strong>📊 Merge Preview:</strong><br>
+                    Current cards in localStorage: ${Object.keys(oldCards).length}<br>
+                    Cards to restore: ${Object.keys(newCards).length}<br><br>
+                    <strong>🎯 After import:</strong><br>
+                    Total cards: ${Object.keys(newCards).length}<br>
+                    Stage distribution will be updated<br><br>
+                    <strong>⚠️ Note:</strong><br>
+                    This will restore learning history from 2026-07-08<br>
+                    New words (1065+) will remain at stage 0
+                `;
+                details.style.display = 'block';
+
+                statusText.innerHTML = '✓ Ready to restore learning history<br><small>Click button below to proceed</small>';
+                statusText.className = 'loading';
+
+            } catch(e) {
+                statusText.innerHTML = '❌ Error: ' + e.message;
+                statusText.className = 'error';
+            }
+        });
+
+        function importStudyState() {
+            const btn = document.getElementById('import-btn');
+            const statusText = document.getElementById('status-text');
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Importing...';
+            statusText.innerHTML = '⏳ Đang import...';
+            statusText.className = 'loading';
+
+            try {
+                // Import merged study state
+                localStorage.setItem('tm_ielts_v3', JSON.stringify(mergedStudyState));
+
+                statusText.innerHTML = `
+                    <span class="success">✓ SUCCESS!</span><br>
+                    <br>
+                    ✓ Learning history restored<br>
+                    ✓ ${Object.keys(mergedStudyState.cards).length} cards imported<br>
+                    ✓ Stage distribution preserved<br>
+                    <br>
+                    📢 Redirecting to app in 3 seconds...
+                `;
+                statusText.className = 'success';
+
+                btn.style.display = 'none';
+
+                // Redirect to app
+                setTimeout(() => {
+                    window.location.href = 'ielts-vocab-app.html?import=success';
+                }, 3000);
+
+            } catch(e) {
+                statusText.innerHTML = '❌ Error: ' + e.message;
+                statusText.className = 'error';
+                btn.disabled = false;
+                btn.textContent = '✓ Thử Lại';
+            }
+        }
+    </script>
+</body>
+</html>
