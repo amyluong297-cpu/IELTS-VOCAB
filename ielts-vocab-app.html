@@ -4373,10 +4373,14 @@ function quickStudy(id){
 // ═══════════════════════════════════════════════════════
 let selectedVoice=null;
 const ALLOWED_VOICE_NAMES=['Ryan','Sonia','Natasha','William','Clara','Emily','Ava','Andrew','Emma','Brian','Wayne','Molly'];
+function getFilteredVoices(){
+  const allEnVoices=window.speechSynthesis.getVoices().filter(v=>v.lang.startsWith('en'));
+  const preferred=allEnVoices.filter(v=>ALLOWED_VOICE_NAMES.some(n=>v.name.toLowerCase().includes(n.toLowerCase())));
+  // Fallback: if none of the preferred voices exist on this device (e.g. mobile), show all available English voices
+  return preferred.length?preferred:allEnVoices;
+}
 function loadVoices(){
-  const voices=window.speechSynthesis.getVoices();
-  const allEnVoices=voices.filter(v=>v.lang.startsWith('en'));
-  const enVoices=allEnVoices.filter(v=>ALLOWED_VOICE_NAMES.some(n=>v.name.toLowerCase().includes(n.toLowerCase())));
+  const enVoices=getFilteredVoices();
   if(!enVoices.length)return;
   const sel=document.getElementById('voice-sel');
   const saved=localStorage.getItem('ielts_voice_name');
@@ -4385,7 +4389,7 @@ function loadVoices(){
   if(selectedVoice)sel.value=enVoices.indexOf(selectedVoice);
 }
 function setVoiceByIndex(idx){
-  const voices=window.speechSynthesis.getVoices().filter(v=>v.lang.startsWith('en')).filter(v=>ALLOWED_VOICE_NAMES.some(n=>v.name.toLowerCase().includes(n.toLowerCase())));
+  const voices=getFilteredVoices();
   selectedVoice=voices[parseInt(idx)]||voices[0];
   if(selectedVoice)localStorage.setItem('ielts_voice_name',selectedVoice.name);
 }
