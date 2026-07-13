@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ielts-vocab-v1';
+const CACHE_NAME = 'ielts-vocab-v2-20260711';
 const STATIC_ASSETS = [
   './',
   './ielts-vocab-app.html',
@@ -38,51 +38,42 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event
+// HTML/navigation requests: network-first (always get latest code), cache only as offline fallback.
+// Other assets: cache-first (fast, rarely change).
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
-  if (request.method !== 'GET') {
-    return;
-  }
+  if (request.method !== 'GET') return;
+  if (url.origin !== location.origin) return;
 
-  // Skip cross-origin requests
-  if (url.origin !== location.origin) {
+  const isHTML = request.mode === 'navigate' || request.destination === 'document' || url.pathname.endsWith('.html');
+
+  if (isHTML) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then(r => r || caches.match('./ielts-vocab-app.html')))
+    );
     return;
   }
 
   event.respondWith(
     caches.match(request).then((response) => {
-      if (response) {
-        console.log('Serving from cache:', request.url);
+      if (response) return response;
+      return fetch(request).then((response) => {
+        if (!response || response.status !== 200 || response.type === 'error') return response;
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
         return response;
-      }
-
-      console.log('Fetching from network:', request.url);
-      return fetch(request)
-        .then((response) => {
-          // Don't cache non-successful responses
-          if (!response || response.status !== 200 || response.type === 'error') {
-            return response;
-          }
-
-          // Clone the response
-          const responseToCache = response.clone();
-
-          // Cache successful responses
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseToCache);
-          });
-
-          return response;
-        })
-        .catch(() => {
-          // Offline fallback
-          console.log('Network request failed, offline mode');
-          return caches.match('./ielts-vocab-app.html');
-        });
+      });
     })
   );
 });
