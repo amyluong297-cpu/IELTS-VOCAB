@@ -4855,8 +4855,8 @@ function renderSkillChecklist(){
     const bg=isDone?`linear-gradient(135deg,${s.color},${s.color}CC)`:'var(--bg)';
     const txtColor=isDone?'#fff':'var(--text)';
     const subColor=isDone?'rgba(255,255,255,.85)':'var(--muted)';
-    const pct=Math.min(100,Math.round(n/s.target*100));
-    const progressLabel=`${Math.min(n,s.target)}/${s.target} · ${pct}%`;
+    const pct=Math.round(n/s.target*100);
+    const progressLabel=`${n}/${s.target} · ${pct}%`;
     return `<button onclick="${s.start}" style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:10px;border:2px solid ${s.color};background:${bg};cursor:pointer;text-align:center;transition:transform .15s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
       <span style="font-size:1.1rem">${isDone?'✅':s.icon}</span>
       <span style="font-size:.66rem;font-weight:700;color:${txtColor};line-height:1.2">${s.label}</span>
