@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ielts-vocab-v180-20260922-dedup';
+const CACHE_NAME = 'ielts-vocab-v181-20260923-hardresync';
 const STATIC_ASSETS = [
   './',
   './ielts-vocab-app.html',
