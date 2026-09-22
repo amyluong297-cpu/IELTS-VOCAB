@@ -10769,6 +10769,56 @@ try {
     console.log('Hard resync 2026-09-23: VOCAB ' + beforeV + ' -> ' + VOCAB.length + ' (removed ' + staleV.length + '), SPEAKING_ITEMS ' + beforeS + ' -> ' + SPEAKING_ITEMS.length + ' (removed ' + staleS.length + ')', staleV.map(v=>v.phrase+'|'+v.topic), staleS.map(s=>s.question));
   }
 } catch(e) { console.error('Hard resync 2026-09-23 failed:', e); }
+
+// 2026-09-23b: full sweep, round 2. A screenshot showed "raise doubts about the effectiveness" (old
+// general-vocab-bank writing style) rendered through the CURRENT collocations-and-chunks card, which
+// only happens for a word already sitting in the CURRENT 663 -- meaning the previous day's leftover
+// old-bank content wasn't a stray VOCAB row at all, but an in-app "Sua tu"/"Sua cau" EDIT (tm_corrections_v1
+// / tm_speak_corrections_v1) that overrides a canonical entry's displayed phrase/question. effWord()/
+// effSpeak() merge these overrides on top of the base object, so the hard-resync allowlist (which only
+// ever inspected the BASE VOCAB/SPEAKING_ITEMS arrays) could never see or catch this. This pass covers
+// the two correction stores specifically: any correction that overrides `phrase` (vocab) or `question`
+// (speaking) to something outside CANON_VOCAB_KEYS_20260923 / CANON_SPEAK_KEYS_20260923 is dropped
+// entirely, reverting that word/question back to its clean canonical content; corrections that only
+// tweak other fields (def, ex, answer, ...) are left alone, and any correction pointing at an id that
+// no longer exists at all is dropped too.
+try {
+  if(!localStorage.getItem('tm_corrections_resync_20260923b')) {
+    let fixedC=0,fixedS=0;
+    try {
+      const corr=JSON.parse(localStorage.getItem(CK))||{};
+      const vocabById={}; VOCAB.forEach(v=>{vocabById[v.id]=v;});
+      let changedC=false;
+      Object.keys(corr).forEach(id=>{
+        const base=vocabById[id];
+        if(!base){ delete corr[id]; changedC=true; fixedC++; return; }
+        const fix=corr[id];
+        if(fix&&typeof fix.phrase==='string'){
+          const mergedTopic=(typeof fix.topic==='string'?fix.topic:base.topic)||'';
+          const key=(fix.phrase.trim().toLowerCase()+'|'+mergedTopic.trim().toLowerCase());
+          if(!CANON_VOCAB_KEYS_20260923.has(key)){ delete corr[id]; changedC=true; fixedC++; }
+        }
+      });
+      if(changedC) localStorage.setItem(CK, JSON.stringify(corr));
+    } catch(e) { console.error('Vocab corrections sweep failed:', e); }
+    try {
+      const corrS=JSON.parse(localStorage.getItem(SPCK))||{};
+      const speakByIdNum={}; SPEAKING_ITEMS.forEach(s=>{speakByIdNum[s.id]=s;});
+      let changedS=false;
+      Object.keys(corrS).forEach(id=>{
+        const base=speakByIdNum[id];
+        if(!base){ delete corrS[id]; changedS=true; fixedS++; return; }
+        const fixS=corrS[id];
+        if(fixS&&typeof fixS.question==='string'){
+          if(!CANON_SPEAK_KEYS_20260923.has(fixS.question.trim().toLowerCase())){ delete corrS[id]; changedS=true; fixedS++; }
+        }
+      });
+      if(changedS) localStorage.setItem(SPCK, JSON.stringify(corrS));
+    } catch(e) { console.error('Speaking corrections sweep failed:', e); }
+    localStorage.setItem('tm_corrections_resync_20260923b', '1');
+    console.log('Corrections sweep 2026-09-23b: dropped ' + fixedC + ' stale vocab corrections, ' + fixedS + ' stale speaking corrections.');
+  }
+} catch(e) { console.error('Corrections sweep 2026-09-23b failed:', e); }
 function listenPoolItems(){ return SPEAKING_ITEMS.filter(s=>s.src!=='ngocbach'); }
 
 
